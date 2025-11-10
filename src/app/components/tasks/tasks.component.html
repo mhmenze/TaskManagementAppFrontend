@@ -11,13 +11,25 @@
   </div>
 
   <!-- Messages -->
-  <div *ngIf="errorMessage" class="alert alert-error">
-    {{ errorMessage }}
-    <button class="close-btn" (click)="errorMessage = ''">×</button>
-  </div>
-  <div *ngIf="successMessage" class="alert alert-success">
-    {{ successMessage }}
-    <button class="close-btn" (click)="successMessage = ''">×</button>
+  <div *ngIf="alerts.length > 0" class="modal-backdrop">
+    <div class="modal-content">
+      <div *ngFor="let alert of alerts; let i = index" class="popup-message"
+        [class.alert-error]="alert.type === 'error'" [class.alert-success]="alert.type === 'success'">
+        <div class="popup-header">
+          <span class="popup-icon">
+            <span *ngIf="alert.type === 'success'">🎉 Success!</span>
+            <span *ngIf="alert.type === 'error'">⚠️ Error!</span>
+          </span>
+          <button class="close-btn" (click)="closeAlert(i)">×</button>
+        </div>
+
+        <p class="popup-body">{{ alert.message }}</p>
+
+        <button class="btn btn-primary btn-sm" (click)="closeAlert(i)">
+          OK, Got It
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- Main Content - Side by Side Layout -->
@@ -26,17 +38,12 @@
     <div class="task-list-section">
       <div class="section-header">
         <h2>Tasks</h2>
-        
+
         <!-- Filters -->
         <div class="filters">
-          <input 
-            type="text" 
-            [(ngModel)]="filterSearch" 
-            (ngModelChange)="onFilterChange()"
-            placeholder="Search tasks..." 
-            class="form-control search-input"
-          />
-          
+          <input type="text" [(ngModel)]="filterSearch" (ngModelChange)="onFilterChange()" placeholder="Search tasks..."
+            class="form-control search-input" />
+
           <select [(ngModel)]="filterStatus" (ngModelChange)="onFilterChange()" class="form-control">
             <option [ngValue]="undefined">All Status</option>
             <option [ngValue]="TaskStatus.ToDo">To Do</option>
@@ -52,11 +59,8 @@
             <option value="status">Status</option>
           </select>
 
-          <button 
-            class="btn btn-icon" 
-            (click)="sortDescending = !sortDescending; onFilterChange()"
-            [title]="sortDescending ? 'Descending' : 'Ascending'"
-          >
+          <button class="btn btn-icon" (click)="sortDescending = !sortDescending; onFilterChange()"
+            [title]="sortDescending ? 'Descending' : 'Ascending'">
             {{ sortDescending ? '↓' : '↑' }}
           </button>
         </div>
@@ -68,28 +72,48 @@
           <div class="task-card-header">
             <h3>{{ task.taskName }}</h3>
             <span class="status-badge" [ngClass]="getStatusClass(task.status)">
-                {{ getStatusLabel(task.status) }}
+              {{ getStatusLabel(task.status) }}
             </span>
           </div>
-          
+
           <p class="task-description">{{ task.taskDescription || 'No description' }}</p>
-          
+
           <div class="task-meta">
             <span *ngIf="task.deadline" class="meta-item">
-                {{ task.deadline | date:'short' }}
+              🗓️ {{ task.deadline | date:'short' }}
             </span>
             <span *ngIf="task.isDelayed" class="meta-item delayed-tag">⚠️ Delayed</span>
+          </div>
+
+          <!-- Assignees Display -->
+          <div class="task-assignees" *ngIf="task.assignedUserIDs && task.assignedUserIDs.length > 0">
+            <span class="assignees-label">Assigned to:</span>
+            <div class="assignee-avatars">
+              <ng-container *ngFor="let userId of task.assignedUserIDs.slice(0, 3)">
+                <div class="assignee-avatar" *ngIf="getUserById(userId) as user">
+                  <span class="assignee-icon">{{ getInitials(user) }}</span>
+                  <span class="assignee-name">{{ user.displayName || user.firstName + ' ' + user.lastName }}</span>
+                </div>
+              </ng-container>
+              <div class="assignee-count-badge" *ngIf="task.assignedUserIDs.length > 3"
+                [title]="getExtraAssigneesText(task.assignedUserIDs)">
+                +{{ task.assignedUserIDs.length - 3 }}
+              </div>
+            </div>
+          </div>
+
+          <div class="task-assignees" *ngIf="!task.assignedUserIDs || task.assignedUserIDs.length === 0">
+            <div class="unassigned-indicator">
+              <span class="assignee-icon">?</span>
+              <span>Unassigned</span>
+            </div>
           </div>
 
           <div class="task-actions">
             <button class="btn btn-sm btn-primary" (click)="onEditTask(task)">Edit</button>
             <button class="btn btn-sm btn-danger" (click)="onDeleteTask(task.taskID)">Delete</button>
-            
-            <select 
-              [value]="task.status" 
-              (change)="onUpdateStatus(task.taskID, +$any($event.target).value)"
-              class="status-select"
-            >
+            <select [value]="task.status" (change)="onUpdateStatus(task.taskID, +$any($event.target).value)"
+              class="status-select">
               <option [value]="TaskStatus.ToDo">To Do</option>
               <option [value]="TaskStatus.InProgress">In Progress</option>
               <option [value]="TaskStatus.Completed">Completed</option>
@@ -102,7 +126,6 @@
           No tasks found
         </div>
       </div>
-
       <div *ngIf="loading" class="loading">
         Loading tasks...
       </div>
@@ -117,13 +140,8 @@
       <form [formGroup]="taskForm" (ngSubmit)="onCreateTask()" class="task-form">
         <div class="form-group">
           <label for="taskName">Task Name *</label>
-          <input 
-            type="text" 
-            id="taskName" 
-            formControlName="taskName" 
-            class="form-control"
-            placeholder="Enter task name"
-          />
+          <input type="text" id="taskName" formControlName="taskName" class="form-control"
+            placeholder="Enter task name" />
           <div *ngIf="taskForm.get('taskName')?.invalid && taskForm.get('taskName')?.touched" class="error-text">
             Task name is required
           </div>
@@ -131,23 +149,13 @@
 
         <div class="form-group">
           <label for="taskDescription">Description</label>
-          <textarea 
-            id="taskDescription" 
-            formControlName="taskDescription" 
-            class="form-control"
-            rows="4"
-            placeholder="Enter task description"
-          ></textarea>
+          <textarea id="taskDescription" formControlName="taskDescription" class="form-control" rows="4"
+            placeholder="Enter task description"></textarea>
         </div>
 
         <div class="form-group">
           <label for="assignedUserIDs">Assign To</label>
-          <select 
-            id="assignedUserIDs" 
-            formControlName="assignedUserIDs" 
-            class="form-control"
-            multiple
-          >
+          <select id="assignedUserIDs" formControlName="assignedUserIDs" class="form-control" multiple>
             <option *ngFor="let user of users" [value]="user.userID">
               {{ user.displayName || user.firstName + ' ' + user.lastName }}
             </option>
@@ -157,12 +165,16 @@
 
         <div class="form-group">
           <label for="deadline">Deadline</label>
-          <input 
-            type="datetime-local" 
-            id="deadline" 
-            formControlName="deadline" 
-            class="form-control"
-          />
+          <mat-form-field appearance="fill" class="form-control">
+            <mat-label>Choose a deadline</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="deadline" placeholder="Select date" />
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+        </div>
+        <div class="form-group">
+          <label for="deadlineTime">Time</label>
+          <input type="time" id="deadlineTime" formControlName="deadlineTime" class="form-control" />
         </div>
 
         <div class="form-group" *ngIf="isEditMode">

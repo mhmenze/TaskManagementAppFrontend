@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '../models/api-response.model';
 import { UserTask, TaskStatus } from '../models/task.model';
-import { CreateTaskRequest, UpdateTaskRequest, TaskFilterRequest, TaskCurrentStatus } from '../models/task-request.model';
+import { CreateTaskRequest, UpdateTaskRequest, TaskFilterRequest } from '../models/task-request.model';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -49,7 +49,7 @@ export class TaskService {
     return this.http.delete<ApiResponse<any>>(`${this.apiUrl}/${taskId}`, { withCredentials: true });
   }
 
-  updateTaskStatus(taskId: number, status: TaskCurrentStatus): Observable<ApiResponse<UserTask>> {
+  updateTaskStatus(taskId: number, status: TaskStatus): Observable<ApiResponse<UserTask>> {
     return this.http.patch<ApiResponse<UserTask>>(`${this.apiUrl}/${taskId}/status`, status, { withCredentials: true });
   }
 }
