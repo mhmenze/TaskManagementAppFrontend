@@ -1,0 +1,189 @@
+<div class="tasks-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-content">
+      <h1>Task Management</h1>
+      <div class="user-info">
+        <span>Welcome, {{ currentUser?.displayName || currentUser?.username }}</span>
+        <button class="btn btn-secondary" (click)="logout()">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="errorMessage" class="alert alert-error">
+    {{ errorMessage }}
+    <button class="close-btn" (click)="errorMessage = ''">×</button>
+  </div>
+  <div *ngIf="successMessage" class="alert alert-success">
+    {{ successMessage }}
+    <button class="close-btn" (click)="successMessage = ''">×</button>
+  </div>
+
+  <!-- Main Content - Side by Side Layout -->
+  <div class="main-content">
+    <!-- Left Side - Task List -->
+    <div class="task-list-section">
+      <div class="section-header">
+        <h2>Tasks</h2>
+        
+        <!-- Filters -->
+        <div class="filters">
+          <input 
+            type="text" 
+            [(ngModel)]="filterSearch" 
+            (ngModelChange)="onFilterChange()"
+            placeholder="Search tasks..." 
+            class="form-control search-input"
+          />
+          
+          <select [(ngModel)]="filterStatus" (ngModelChange)="onFilterChange()" class="form-control">
+            <option [ngValue]="undefined">All Status</option>
+            <option [ngValue]="TaskStatus.ToDo">To Do</option>
+            <option [ngValue]="TaskStatus.InProgress">In Progress</option>
+            <option [ngValue]="TaskStatus.Completed">Completed</option>
+            <option [ngValue]="TaskStatus.UnAssigned">Unassigned</option>
+          </select>
+
+          <select [(ngModel)]="sortBy" (ngModelChange)="onFilterChange()" class="form-control">
+            <option value="created">Created Date</option>
+            <option value="name">Name</option>
+            <option value="deadline">Deadline</option>
+            <option value="status">Status</option>
+          </select>
+
+          <button 
+            class="btn btn-icon" 
+            (click)="sortDescending = !sortDescending; onFilterChange()"
+            [title]="sortDescending ? 'Descending' : 'Ascending'"
+          >
+            {{ sortDescending ? '↓' : '↑' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Task Cards -->
+      <div class="task-cards" *ngIf="!loading">
+        <div *ngFor="let task of filteredTasks" class="task-card" [class.delayed]="task.isDelayed">
+          <div class="task-card-header">
+            <h3>{{ task.taskName }}</h3>
+            <span class="status-badge" [ngClass]="getStatusClass(task.status)">
+                {{ getStatusLabel(task.status) }}
+            </span>
+          </div>
+          
+          <p class="task-description">{{ task.taskDescription || 'No description' }}</p>
+          
+          <div class="task-meta">
+            <span *ngIf="task.deadline" class="meta-item">
+                {{ task.deadline | date:'short' }}
+            </span>
+            <span *ngIf="task.isDelayed" class="meta-item delayed-tag">⚠️ Delayed</span>
+          </div>
+
+          <div class="task-actions">
+            <button class="btn btn-sm btn-primary" (click)="onEditTask(task)">Edit</button>
+            <button class="btn btn-sm btn-danger" (click)="onDeleteTask(task.taskID)">Delete</button>
+            
+            <select 
+              [value]="task.status" 
+              (change)="onUpdateStatus(task.taskID, +$any($event.target).value)"
+              class="status-select"
+            >
+              <option [value]="TaskStatus.ToDo">To Do</option>
+              <option [value]="TaskStatus.InProgress">In Progress</option>
+              <option [value]="TaskStatus.Completed">Completed</option>
+              <option [value]="TaskStatus.UnAssigned">Unassigned</option>
+            </select>
+          </div>
+        </div>
+
+        <div *ngIf="filteredTasks.length === 0" class="no-tasks">
+          No tasks found
+        </div>
+      </div>
+
+      <div *ngIf="loading" class="loading">
+        Loading tasks...
+      </div>
+    </div>
+
+    <!-- Right Side - Task Form -->
+    <div class="task-form-section">
+      <div class="section-header">
+        <h2>{{ isEditMode ? 'Edit Task' : 'Create New Task' }}</h2>
+      </div>
+
+      <form [formGroup]="taskForm" (ngSubmit)="onCreateTask()" class="task-form">
+        <div class="form-group">
+          <label for="taskName">Task Name *</label>
+          <input 
+            type="text" 
+            id="taskName" 
+            formControlName="taskName" 
+            class="form-control"
+            placeholder="Enter task name"
+          />
+          <div *ngIf="taskForm.get('taskName')?.invalid && taskForm.get('taskName')?.touched" class="error-text">
+            Task name is required
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="taskDescription">Description</label>
+          <textarea 
+            id="taskDescription" 
+            formControlName="taskDescription" 
+            class="form-control"
+            rows="4"
+            placeholder="Enter task description"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="assignedUserIDs">Assign To</label>
+          <select 
+            id="assignedUserIDs" 
+            formControlName="assignedUserIDs" 
+            class="form-control"
+            multiple
+          >
+            <option *ngFor="let user of users" [value]="user.userID">
+              {{ user.displayName || user.firstName + ' ' + user.lastName }}
+            </option>
+          </select>
+          <small>Hold Ctrl/Cmd to select multiple users</small>
+        </div>
+
+        <div class="form-group">
+          <label for="deadline">Deadline</label>
+          <input 
+            type="datetime-local" 
+            id="deadline" 
+            formControlName="deadline" 
+            class="form-control"
+          />
+        </div>
+
+        <div class="form-group" *ngIf="isEditMode">
+          <label for="status">Status</label>
+          <select id="status" formControlName="status" class="form-control">
+            <option [value]="TaskStatus.ToDo">To Do</option>
+            <option [value]="TaskStatus.InProgress">In Progress</option>
+            <option [value]="TaskStatus.Completed">Completed</option>
+            <option [value]="TaskStatus.UnAssigned">Unassigned</option>
+          </select>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" [disabled]="loading || taskForm.invalid">
+            {{ loading ? 'Saving...' : (isEditMode ? 'Update Task' : 'Create Task') }}
+          </button>
+          <button type="button" class="btn btn-secondary" (click)="resetForm()" *ngIf="isEditMode">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

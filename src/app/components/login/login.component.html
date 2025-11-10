@@ -1,0 +1,129 @@
+<div class="login-container">
+  <div class="login-card">
+    <h2>{{ isLoginMode ? 'Login' : 'Register' }}</h2>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="alert alert-error">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Success Message -->
+    <div *ngIf="successMessage" class="alert alert-success">
+      {{ successMessage }}
+    </div>
+
+    <!-- Login Form -->
+    <form *ngIf="isLoginMode" [formGroup]="loginForm" (ngSubmit)="onLogin()">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input 
+          type="text" 
+          id="username" 
+          formControlName="username" 
+          class="form-control"
+          [class.invalid]="loginForm.get('username')?.invalid && loginForm.get('username')?.touched"
+        />
+        <div *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched" class="error-text">
+          Username is required
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input 
+          type="password" 
+          id="password" 
+          formControlName="password" 
+          class="form-control"
+          [class.invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+        />
+        <div *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" class="error-text">
+          Password is required
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary" [disabled]="loading || loginForm.invalid">
+        {{ loading ? 'Logging in...' : 'Login' }}
+      </button>
+    </form>
+
+    <!-- Register Form -->
+    <form *ngIf="!isLoginMode" [formGroup]="registerForm" (ngSubmit)="onRegister()">
+      <div class="form-group">
+        <label for="firstName">First Name *</label>
+        <input 
+          type="text" 
+          id="firstName" 
+          formControlName="firstName" 
+          class="form-control"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="middleName">Middle Name</label>
+        <input 
+          type="text" 
+          id="middleName" 
+          formControlName="middleName" 
+          class="form-control"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="lastName">Last Name *</label>
+        <input 
+          type="text" 
+          id="lastName" 
+          formControlName="lastName" 
+          class="form-control"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="regUsername">Username *</label>
+        <input 
+          type="text" 
+          id="regUsername" 
+          formControlName="username" 
+          class="form-control"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email *</label>
+        <input 
+          type="email" 
+          id="email" 
+          formControlName="email" 
+          class="form-control"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="regPassword">Password *</label>
+        <input 
+          type="password" 
+          id="regPassword" 
+          formControlName="password" 
+          class="form-control"
+        />
+        <small>Minimum 6 characters</small>
+      </div>
+
+      <button type="submit" class="btn btn-primary" [disabled]="loading || registerForm.invalid">
+        {{ loading ? 'Registering...' : 'Register' }}
+      </button>
+    </form>
+
+    <div class="toggle-mode">
+      <p *ngIf="isLoginMode">
+        Don't have an account? 
+        <a (click)="toggleMode()">Register here</a>
+      </p>
+      <p *ngIf="!isLoginMode">
+        Already have an account? 
+        <a (click)="toggleMode()">Login here</a>
+      </p>
+    </div>
+  </div>
+</div>
