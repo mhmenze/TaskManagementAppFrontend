@@ -1,5 +1,4 @@
 import { TaskStatus } from './task.model';
-import { User } from './user.model';
 
 export interface CreateTaskRequest {
   taskName: string;

@@ -385,7 +385,6 @@ small {
   cursor: not-allowed;
 }
 
-/* Assignee Display Styles */
 .task-meta-footer {
   display: flex;
   justify-content: space-between;

@@ -132,7 +132,6 @@ export class UserManagementComponent implements OnInit {
       confirmPassword: '',
     });
 
-    // Make password optional for editing
     this.userForm.get('password')?.clearValidators();
     this.userForm.get('confirmPassword')?.clearValidators();
     this.userForm.get('password')?.updateValueAndValidity();
@@ -144,7 +143,6 @@ export class UserManagementComponent implements OnInit {
     this.isEditMode = false;
     this.isEditingSelf = false;
 
-    // Make password required for new users
     this.userForm
       .get('password')
       ?.setValidators([Validators.required, Validators.minLength(6)]);
@@ -161,7 +159,6 @@ export class UserManagementComponent implements OnInit {
 
     const formValue = this.userForm.value;
 
-    // Check if passwords match when provided
     if (
       formValue.password &&
       formValue.password !== formValue.confirmPassword
@@ -173,7 +170,6 @@ export class UserManagementComponent implements OnInit {
     this.loading = true;
 
     if (this.isEditMode && this.selectedUserId) {
-      // Update user
       const updateRequest = {
         firstName: formValue.firstName,
         middleName: formValue.middleName || undefined,
@@ -194,7 +190,6 @@ export class UserManagementComponent implements OnInit {
               this.loadUsers();
               this.resetForm();
 
-              // If user edited themselves, update current user info
               if (this.isEditingSelf) {
                 const updatedUser = { ...this.currentUser, ...updateRequest };
                 this.authService.updateCurrentUser(updatedUser);
@@ -207,7 +202,6 @@ export class UserManagementComponent implements OnInit {
           },
         });
     } else {
-      // Create new user
       const createRequest = {
         firstName: formValue.firstName,
         middleName: formValue.middleName || undefined,

@@ -9,7 +9,8 @@
       <div class="user-info">
         <span>{{ currentUser?.displayName || currentUser?.username }}</span>
         <span class="user-role-badge" *ngIf="isAdmin">Admin</span>
-              <!-- Nav Menu Dropdown -->
+
+        <!-- Nav Menu Dropdown -->
         <div class="user-menu-container">
           <button class="user-menu-btn" (click)="toggleNavMenu()">
             <span class="user-avatar-small">☰</span>
@@ -153,9 +154,6 @@
           <button type="submit" class="btn btn-primary" [disabled]="loading || userForm.invalid">
             {{ loading ? 'Saving...' : (isEditMode ? 'Update User' : 'Create User') }}
           </button>
-          <!-- <button type="button" class="btn btn-secondary" (click)="resetForm()" *ngIf="isEditMode">
-            Cancel
-          </button> -->
         </div>
       </form>
     </div>

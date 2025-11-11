@@ -20,7 +20,6 @@ bootstrapApplication(AppComponent, {
     importProvidersFrom(FormsModule, ReactiveFormsModule),
     provideAnimations(),
 
-    // Your services
     AuthService,
     TaskService,
     UserService,

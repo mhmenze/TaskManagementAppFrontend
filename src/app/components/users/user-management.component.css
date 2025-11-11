@@ -88,7 +88,6 @@
   font-size: 22px;
 }
 
-/* User List Section */
 .user-list-section {
   background: linear-gradient(135deg, #d9d6f8 25%, #ccd6fd 55%);
   padding: 25px;
@@ -187,8 +186,6 @@
   gap: 8px;
 }
 
-
-/* User Form Section */
 .user-form-section {
   background: linear-gradient(135deg, #d9d6f8 25%, #ccd6fd 55%);
   padding: 25px;
@@ -268,7 +265,6 @@ small {
   justify-content: center;
 }
 
-/* Buttons */
 .btn {
   padding: 10px 20px;
   border: none;
@@ -317,7 +313,6 @@ small {
   cursor: not-allowed;
 }
 
-/* Modal Styles */
 .modal-backdrop {
   position: fixed;
   top: 0;
@@ -403,7 +398,6 @@ small {
   color: #333;
 }
 
-/* Confirm Dialog */
 .confirm-dialog {
   text-align: center;
 }
@@ -433,14 +427,12 @@ small {
   margin-top: 25px;
 }
 
-/* Loading and Empty States */
 .loading, .no-users {
   text-align: center;
   padding: 40px;
   color: #999;
 }
 
-/* Animations */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }

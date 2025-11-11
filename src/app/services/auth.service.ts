@@ -74,13 +74,10 @@ export class AuthService {
   }
 
   updateCurrentUser(userData: any): void {
-  // Update the stored user data in sessionStorage/localStorage
   const currentUser = this.getCurrentUser();
     if (currentUser) {
       const updatedUser = { ...currentUser, ...userData };
       sessionStorage.setItem('currentUser', JSON.stringify(updatedUser));
-      // or if you're using localStorage:
-      // localStorage.setItem('currentUser', JSON.stringify(updatedUser));
     }
   }
 }

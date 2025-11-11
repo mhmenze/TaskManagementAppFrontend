@@ -1,12 +1,6 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  FormBuilder,
-  FormGroup,
-  Validators,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TaskService } from '../../services/task.service';
 import { UserService } from '../../services/user.service';
@@ -51,7 +45,6 @@ export class TasksComponent implements OnInit {
   isEditMode = false;
   selectedTaskId?: number;
 
-  // Filter properties
   filterStatus?: TaskStatus;
   filterSearch = '';
   sortBy = 'created';
@@ -59,8 +52,6 @@ export class TasksComponent implements OnInit {
 
   TaskStatus = TaskStatus;
   loading = false;
-  // errorMessage = '';
-  // successMessage = '';
   alerts: Alert[] = [];
 
   currentUser: any;
@@ -118,18 +109,11 @@ export class TasksComponent implements OnInit {
         this.loading = false;
         if (response.success && response.data) {
           this.tasks = response.data;
-          //   this.tasks = response.data.map(
-          //     task => ({...task,
-          //     deadline: task.deadline
-          //       ? new Date(new Date(task.deadline).getTime() + new Date(task.deadline).getTimezoneOffset() * 60000)
-          //       : null
-          // }));
           this.filteredTasks = this.tasks;
         }
       },
       error: (error) => {
         this.loading = false;
-        // this.errorMessage = 'Error loading tasks';
         this.showToast('Error loading task', 'error');
       },
     });
@@ -139,7 +123,6 @@ export class TasksComponent implements OnInit {
     const newAlert: Alert = { message, type };
     this.alerts.push(newAlert);
 
-    // Auto-dismiss after 5 seconds
     newAlert.timeout = setTimeout(() => {
       this.closeAlert(this.alerts.indexOf(newAlert));
     }, 5000);
@@ -162,8 +145,6 @@ export class TasksComponent implements OnInit {
     }
 
     this.loading = true;
-    // this.errorMessage = '';
-    // this.successMessage = '';
 
     const formValue = this.taskForm.value;
     const date = formValue.deadline;
@@ -205,14 +186,13 @@ export class TasksComponent implements OnInit {
         assignedUserIDs: formValue.assignedUserIDs?.length
           ? formValue.assignedUserIDs
           : undefined,
-        status: +formValue.status, // ensure numeric
+        status: +formValue.status,
         deadline: combinedDeadline ? new Date(combinedDeadline) : undefined,
       };
       this.taskService.updateTask(this.selectedTaskId, request).subscribe({
         next: (response) => {
           this.loading = false;
           if (response.success) {
-            // this.successMessage = 'Task updated successfully';
             this.showToast('Task updated successfully', 'success');
             this.loadTasks();
             this.resetForm();
@@ -220,7 +200,6 @@ export class TasksComponent implements OnInit {
         },
         error: () => {
           this.loading = false;
-          // this.errorMessage = 'Error updating task';
           this.showToast('Error updating task', 'error');
         },
       });
@@ -233,7 +212,6 @@ export class TasksComponent implements OnInit {
         next: (response) => {
           this.loading = false;
           if (response.success) {
-            // this.successMessage = 'Task created successfully';
             this.showToast('Task created successfully', 'success');
             this.loadTasks();
             this.resetForm();
@@ -241,7 +219,6 @@ export class TasksComponent implements OnInit {
         },
         error: () => {
           this.loading = false;
-          // this.errorMessage = 'Error creating task';
           this.showToast('Error creating task', 'error');
         },
       });
@@ -259,7 +236,6 @@ export class TasksComponent implements OnInit {
       const d = new Date(task.deadline);
       deadlineDate = new Date(d.getTime());
 
-      // Extract time in HH:mm format
       const hours = deadlineDate.getHours().toString().padStart(2, '0');
       const minutes = deadlineDate.getMinutes().toString().padStart(2, '0');
       deadlineTime = `${hours}:${minutes}`;
@@ -283,13 +259,11 @@ export class TasksComponent implements OnInit {
     this.taskService.deleteTask(taskId).subscribe({
       next: (response) => {
         if (response.success) {
-          // this.successMessage = 'Task deleted successfully';
           this.showToast('Task deleted successfully', 'success');
           this.loadTasks();
         }
       },
       error: (error) => {
-        // this.errorMessage = 'Error deleting task';
         this.showToast('Error deleting task', 'error');
       },
     });
@@ -299,13 +273,11 @@ export class TasksComponent implements OnInit {
     this.taskService.updateTaskStatus(taskId, status).subscribe({
       next: (response) => {
         if (response.success) {
-          // this.successMessage = 'Task status updated';
           this.showToast('Task status updated', 'success');
           this.loadTasks();
         }
       },
       error: (error) => {
-        // this.errorMessage = 'Error updating status';
         this.showToast('Error updating status', 'error');
       },
     });
