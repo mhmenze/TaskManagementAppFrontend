@@ -1,14 +1,37 @@
 <div class="tasks-container">
   <!-- Header -->
-  <div class="header">
-    <div class="header-content">
-      <h1>Task Management</h1>
-      <div class="user-info">
-        <span>Welcome, {{ currentUser?.displayName || currentUser?.username }}</span>
-        <button class="btn btn-secondary" (click)="logout()">Logout</button>
+ <div class="header">
+  <div class="header-content">
+    <h1>Task Management</h1>
+    <div class="user-info">
+      <span>Welcome, {{ currentUser?.displayName || currentUser?.username }}</span>
+      
+      <!-- User Menu Dropdown -->
+      <div class="user-menu-container">
+        <button class="user-menu-btn" (click)="toggleUserMenu()">
+          <span class="user-avatar-small">{{ getUserInitials() }}</span>
+          <span class="dropdown-arrow">▼</span>
+        </button>
+        
+        <div class="user-dropdown" *ngIf="showUserMenu">
+          <div class="dropdown-item" (click)="navigateToUserManagement()">
+            <span class="dropdown-icon">👤</span>
+            <span>My Profile</span>
+          </div>
+          <div class="dropdown-item" (click)="navigateToUserManagement()" *ngIf="isAdmin">
+            <span class="dropdown-icon">👥</span>
+            <span>Manage Users</span>
+          </div>
+          <div class="dropdown-divider"></div>
+          <div class="dropdown-item logout-item" (click)="logout()">
+            <span class="dropdown-icon">🚪</span>
+            <span>Logout</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
+</div>
 
   <!-- Messages -->
   <div *ngIf="alerts.length > 0" class="modal-backdrop">

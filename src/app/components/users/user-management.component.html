@@ -1,0 +1,210 @@
+<div class="user-management-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-content">
+      <div class="header-left">
+        <button class="btn-back" (click)="goBack()">← Back to Tasks</button>
+        <h1>User Management</h1>
+      </div>
+      <div class="user-info">
+        <span>{{ currentUser?.displayName || currentUser?.username }}</span>
+        <span class="user-role-badge" *ngIf="isAdmin">Admin</span>
+              <!-- Nav Menu Dropdown -->
+        <div class="user-menu-container">
+          <button class="user-menu-btn" (click)="toggleNavMenu()">
+            <span class="user-avatar-small">☰</span>
+            <span class="dropdown-arrow">▼</span>
+          </button>
+          
+          <div class="user-dropdown" *ngIf="showNavMenu">
+            <div class="dropdown-item" (click)="goBack()">
+              <span class="dropdown-icon">☑️</span>
+              <span>Manage Tasks</span>
+            </div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item logout-item" (click)="logout()">
+              <span class="dropdown-icon">🚪</span>
+              <span>Logout</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alert Messages -->
+  <div *ngIf="alerts.length > 0" class="modal-backdrop">
+    <div class="modal-content">
+      <div *ngFor="let alert of alerts; let i = index" class="popup-message"
+        [class.alert-error]="alert.type === 'error'" [class.alert-success]="alert.type === 'success'">
+        <div class="popup-header">
+          <span class="popup-icon">
+            <span *ngIf="alert.type === 'success'">🎉 Success!</span>
+            <span *ngIf="alert.type === 'error'">⚠️ Error!</span>
+          </span>
+          <button class="close-btn" (click)="closeAlert(i)">×</button>
+        </div>
+        <p class="popup-body">{{ alert.message }}</p>
+        <button class="btn btn-primary btn-sm" (click)="closeAlert(i)">OK, Got It</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div *ngIf="showDeleteConfirm" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="confirm-dialog">
+        <h3>⚠️ Confirm Delete</h3>
+        <p>Are you sure you want to delete user <strong>{{ userToDelete?.username }}</strong>?</p>
+        <p class="warning-text">This action cannot be undone.</p>
+        <div class="confirm-actions">
+          <button class="btn btn-danger" (click)="onDeleteUser()">Yes, Delete</button>
+          <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+
+    <div class="user-form-section">
+      <div class="section-header">
+        <h2>{{ isEditMode ? (isEditingSelf ? 'Edit Your Profile' : 'Edit User') : 'Create New User' }}</h2>
+      </div>
+
+      <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="user-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName">First Name *</label>
+            <input type="text" id="firstName" formControlName="firstName" class="form-control"
+                   placeholder="Enter first name" />
+            <div *ngIf="userForm.get('firstName')?.invalid && userForm.get('firstName')?.touched" class="error-text">
+              First name is required
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="middleName">Middle Name</label>
+            <input type="text" id="middleName" formControlName="middleName" class="form-control"
+                   placeholder="Enter middle name" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="lastName">Last Name *</label>
+          <input type="text" id="lastName" formControlName="lastName" class="form-control"
+                 placeholder="Enter last name" />
+          <div *ngIf="userForm.get('lastName')?.invalid && userForm.get('lastName')?.touched" class="error-text">
+            Last name is required
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="displayName">Display Name *</label>
+          <input type="text" id="displayName" formControlName="displayName" class="form-control"
+                 placeholder="Enter Display name" />
+        </div>
+
+        <div class="form-group">
+          <label for="username">Username *</label>
+          <input type="text" id="username" formControlName="username" class="form-control"
+                 placeholder="Enter username" [readonly]="isEditMode" />
+          <div *ngIf="userForm.get('username')?.invalid && userForm.get('username')?.touched" class="error-text">
+            Username is required
+          </div>
+          <small *ngIf="isEditMode">Username cannot be changed</small>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email *</label>
+          <input type="email" id="email" formControlName="email" class="form-control"
+                 placeholder="Enter email address" />
+          <div *ngIf="userForm.get('email')?.invalid && userForm.get('email')?.touched" class="error-text">
+            Valid email is required
+          </div>
+        </div>
+
+        <div class="form-divider"></div>
+
+        <div class="form-group">
+          <label for="password">{{ isEditMode ? 'New Password' : 'Password *' }}</label>
+          <input type="password" id="password" formControlName="password" class="form-control"
+                 placeholder="Enter password" />
+          <div *ngIf="userForm.get('password')?.invalid && userForm.get('password')?.touched" class="error-text">
+            Password must be at least 6 characters
+          </div>
+          <small *ngIf="isEditMode">Leave blank to keep current password</small>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">{{ isEditMode ? 'Confirm New Password' : 'Confirm Password *' }}</label>
+          <input type="password" id="confirmPassword" formControlName="confirmPassword" class="form-control"
+                 placeholder="Confirm password" />
+          <div *ngIf="userForm.get('confirmPassword')?.invalid && userForm.get('confirmPassword')?.touched" class="error-text">
+            Please confirm your password
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" [disabled]="loading || userForm.invalid">
+            {{ loading ? 'Saving...' : (isEditMode ? 'Update User' : 'Create User') }}
+          </button>
+          <button type="button" class="btn btn-secondary" (click)="resetForm()" *ngIf="isEditMode">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div class="user-list-section">
+      <div class="section-header">
+        <h2>Users</h2>
+        <button class="btn btn-primary" (click)="onEditUser(currentUser)">
+           Edit Profile
+        </button>
+        <button class="btn btn-primary" (click)="onCreateNewUser()" *ngIf="isAdmin">
+          + New User
+        </button>
+      </div>
+
+      <!-- Search -->
+      <div class="search-bar">
+        <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()" 
+               placeholder="Search users..." class="form-control search-input" />
+      </div>
+
+      <!-- User Cards -->
+      <div class="user-cards" *ngIf="!loading">
+        <div *ngFor="let user of filteredUsers" class="user-card">
+          <div class="user-avatar">
+            <span class="avatar-circle">{{ getInitials(user) }}</span>
+          </div>
+          <div class="user-details">
+            <h3>{{ user.displayName || (user.firstName + ' ' + user.lastName) }}</h3>
+            <p class="user-username">{{ user.username }}</p>
+            <p class="user-email">{{ user.email }}</p>
+            <span class="admin-icon" *ngIf="user.userRole=='admin'">Admin</span>
+          </div>
+          <div class="user-actions">
+            <button class="btn btn-sm btn-primary" (click)="onEditUser(user)" *ngIf="isAdmin" [title]="'Edit user'">
+              Edit
+            </button>
+            <button class="btn btn-sm btn-danger" (click)="confirmDelete(user)" *ngIf="isAdmin">
+              Delete
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="filteredUsers.length === 0" class="no-users">
+          No users found
+        </div>
+      </div>
+
+      <div *ngIf="loading" class="loading">
+        Loading users...
+      </div>
+    </div>
+    
+  </div>
+</div>

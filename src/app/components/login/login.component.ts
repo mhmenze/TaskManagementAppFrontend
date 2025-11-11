@@ -34,7 +34,8 @@ export class LoginComponent implements OnInit {
       return;
     }
 
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/tasks';
+    // this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/tasks';
+    this.returnUrl = '/tasks';
 
     this.loginForm = this.formBuilder.group({
       username: ['', Validators.required],

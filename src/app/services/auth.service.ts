@@ -44,14 +44,17 @@ export class AuthService {
   }
 
   checkCurrentUser(): void {
-    this.http.get<ApiResponse<any>>(`${this.apiUrl}/current-user`, { withCredentials: true })
+    const stored = localStorage.getItem('currentUser');
+    if (stored) {
+      this.currentUserSubject.next(JSON.parse(stored));
+    }
+
+    this.http.get<ApiResponse<LoginResponse>>(`${this.apiUrl}/current-user`, { withCredentials: true })
       .subscribe({
         next: (response) => {
           if (response.success && response.data) {
-            const stored = localStorage.getItem('currentUser');
-            if (stored) {
-              this.currentUserSubject.next(JSON.parse(stored));
-            }
+            this.currentUserSubject.next(response.data);
+            localStorage.setItem('currentUser', JSON.stringify(response.data));
           }
         },
         error: () => {
@@ -61,11 +64,23 @@ export class AuthService {
       });
   }
 
+
   isLoggedIn(): boolean {
     return this.currentUserSubject.value !== null;
   }
 
   getCurrentUser(): LoginResponse | null {
     return this.currentUserSubject.value;
+  }
+
+  updateCurrentUser(userData: any): void {
+  // Update the stored user data in sessionStorage/localStorage
+  const currentUser = this.getCurrentUser();
+    if (currentUser) {
+      const updatedUser = { ...currentUser, ...userData };
+      sessionStorage.setItem('currentUser', JSON.stringify(updatedUser));
+      // or if you're using localStorage:
+      // localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+    }
   }
 }

@@ -385,8 +385,6 @@ small {
   cursor: not-allowed;
 }
 
-/* Add these styles to your existing tasks.component.css */
-
 /* Assignee Display Styles */
 .task-assignees {
   display: flex;

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
@@ -44,6 +44,8 @@ export class TasksComponent implements OnInit {
   tasks: UserTask[] = [];
   filteredTasks: UserTask[] = [];
   users: User[] = [];
+  showUserMenu = false;
+  isAdmin = false;
 
   taskForm!: FormGroup;
   isEditMode = false;
@@ -73,6 +75,7 @@ export class TasksComponent implements OnInit {
 
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUser();
+    this.isAdmin = this.currentUser?.role === 'admin';
 
     this.taskForm = this.formBuilder.group({
       taskName: ['', Validators.required],
@@ -109,6 +112,7 @@ export class TasksComponent implements OnInit {
       sortDescending: this.sortDescending,
     };
 
+    console.log(filter);
     this.taskService.getAllTasks(filter).subscribe({
       next: (response) => {
         this.loading = false;
@@ -392,5 +396,38 @@ export class TasksComponent implements OnInit {
         this.router.navigate(['/login']);
       },
     });
+  }
+
+  toggleUserMenu(): void {
+    this.showUserMenu = !this.showUserMenu;
+  }
+
+  getUserInitials(): string {
+    if (this.currentUser) {
+      const firstName = this.currentUser.firstName || this.currentUser.displayName?.split(' ')[0] || '';
+      const lastName = this.currentUser.lastName || this.currentUser.displayName?.split(' ')[1] || '';
+      
+      if (firstName && lastName) {
+        return (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
+      } else if (firstName) {
+        return firstName.substring(0, 2).toUpperCase();
+      } else if (this.currentUser.username) {
+        return this.currentUser.username.substring(0, 2).toUpperCase();
+      }
+    }
+    return 'U';
+  }
+
+  navigateToUserManagement(): void {
+    this.showUserMenu = false;
+    this.router.navigate(['/user-management']);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.user-menu-container')) {
+      this.showUserMenu = false;
+    }
   }
 }
