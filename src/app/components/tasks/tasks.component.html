@@ -1,37 +1,37 @@
 <div class="tasks-container">
   <!-- Header -->
- <div class="header">
-  <div class="header-content">
-    <h1>Task Management</h1>
-    <div class="user-info">
-      <span>Welcome, {{ currentUser?.displayName || currentUser?.username }}</span>
-      
-      <!-- User Menu Dropdown -->
-      <div class="user-menu-container">
-        <button class="user-menu-btn" (click)="toggleUserMenu()">
-          <span class="user-avatar-small">{{ getUserInitials() }}</span>
-          <span class="dropdown-arrow">▼</span>
-        </button>
-        
-        <div class="user-dropdown" *ngIf="showUserMenu">
-          <div class="dropdown-item" (click)="navigateToUserManagement()">
-            <span class="dropdown-icon">👤</span>
-            <span>My Profile</span>
-          </div>
-          <div class="dropdown-item" (click)="navigateToUserManagement()" *ngIf="isAdmin">
-            <span class="dropdown-icon">👥</span>
-            <span>Manage Users</span>
-          </div>
-          <div class="dropdown-divider"></div>
-          <div class="dropdown-item logout-item" (click)="logout()">
-            <span class="dropdown-icon">🚪</span>
-            <span>Logout</span>
+  <div class="header">
+    <div class="header-content">
+      <h1>Task Management</h1>
+      <div class="user-info">
+        <span>Welcome, {{ currentUser?.displayName || currentUser?.username }}</span>
+
+        <!-- User Menu Dropdown -->
+        <div class="user-menu-container">
+          <button class="user-menu-btn" (click)="toggleUserMenu()">
+            <span class="user-avatar-small">{{ getUserInitials() }}</span>
+            <span class="dropdown-arrow">▼</span>
+          </button>
+
+          <div class="user-dropdown" *ngIf="showUserMenu">
+            <div class="dropdown-item" (click)="navigateToUserManagement()">
+              <span class="dropdown-icon">👤</span>
+              <span>My Profile</span>
+            </div>
+            <div class="dropdown-item" (click)="navigateToUserManagement()" *ngIf="isAdmin">
+              <span class="dropdown-icon">👥</span>
+              <span>Manage Users</span>
+            </div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item logout-item" (click)="logout()">
+              <span class="dropdown-icon">🚪</span>
+              <span>Logout</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 
   <!-- Messages -->
   <div *ngIf="alerts.length > 0" class="modal-backdrop">
@@ -109,26 +109,38 @@
           </div>
 
           <!-- Assignees Display -->
-          <div class="task-assignees" *ngIf="task.assignedUserIDs && task.assignedUserIDs.length > 0">
-            <span class="assignees-label">Assigned to:</span>
-            <div class="assignee-avatars">
-              <ng-container *ngFor="let userId of task.assignedUserIDs.slice(0, 3)">
-                <div class="assignee-avatar" *ngIf="getUserById(userId) as user">
-                  <span class="assignee-icon">{{ getInitials(user) }}</span>
-                  <span class="assignee-name">{{ user.displayName || user.firstName + ' ' + user.lastName }}</span>
+          <div class="task-meta-footer">
+            <div class="task-assignees-wrapper">
+              <div class="task-assignees" *ngIf="task.assignedUserIDs && task.assignedUserIDs.length > 0">
+                <span class="assignees-label">Assigned to:</span>
+                <div class="assignee-avatars">
+                  <ng-container *ngFor="let userId of task.assignedUserIDs.slice(0, 3)">
+                    <div class="assignee-avatar" *ngIf="getUserById(userId) as user">
+                      <span class="assignee-icon">{{ getInitials(user) }}</span>
+                      <span class="assignee-name">{{ user.displayName || user.firstName + ' ' + user.lastName }}</span>
+                    </div>
+                  </ng-container>
+                  <div class="assignee-count-badge" *ngIf="task.assignedUserIDs.length > 3"
+                    [title]="getExtraAssigneesText(task.assignedUserIDs)">
+                    +{{ task.assignedUserIDs.length - 3 }}
+                  </div>
                 </div>
-              </ng-container>
-              <div class="assignee-count-badge" *ngIf="task.assignedUserIDs.length > 3"
-                [title]="getExtraAssigneesText(task.assignedUserIDs)">
-                +{{ task.assignedUserIDs.length - 3 }}
+              </div>
+
+              <div class="task-assignees" *ngIf="!task.assignedUserIDs || task.assignedUserIDs.length === 0">
+                <div class="unassigned-indicator">
+                  <span class="assignee-icon">?</span>
+                  <span>Unassigned</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div class="task-assignees" *ngIf="!task.assignedUserIDs || task.assignedUserIDs.length === 0">
-            <div class="unassigned-indicator">
-              <span class="assignee-icon">?</span>
-              <span>Unassigned</span>
+            <div class="task-created-info">
+              <span class="created-label">Created by:</span>
+              <span class="created-value">{{ task.createdBy }}</span>
+
+              <span class="created-label separator">On:</span>
+              <span class="created-value">{{ task.createdOn | date:'shortDate' }}</span>
             </div>
           </div>
 

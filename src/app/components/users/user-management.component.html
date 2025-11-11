@@ -71,6 +71,9 @@
     <div class="user-form-section">
       <div class="section-header">
         <h2>{{ isEditMode ? (isEditingSelf ? 'Edit Your Profile' : 'Edit User') : 'Create New User' }}</h2>
+        <button class="btn btn-primary" (click)="onEditUser(loginUser)" *ngIf="!isEditingSelf">
+          Edit your info
+        </button>
       </div>
 
       <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="user-form">
@@ -150,9 +153,9 @@
           <button type="submit" class="btn btn-primary" [disabled]="loading || userForm.invalid">
             {{ loading ? 'Saving...' : (isEditMode ? 'Update User' : 'Create User') }}
           </button>
-          <button type="button" class="btn btn-secondary" (click)="resetForm()" *ngIf="isEditMode">
+          <!-- <button type="button" class="btn btn-secondary" (click)="resetForm()" *ngIf="isEditMode">
             Cancel
-          </button>
+          </button> -->
         </div>
       </form>
     </div>
@@ -160,9 +163,6 @@
     <div class="user-list-section">
       <div class="section-header">
         <h2>Users</h2>
-        <button class="btn btn-primary" (click)="onEditUser(currentUser)">
-           Edit Profile
-        </button>
         <button class="btn btn-primary" (click)="onCreateNewUser()" *ngIf="isAdmin">
           + New User
         </button>

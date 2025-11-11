@@ -386,6 +386,43 @@ small {
 }
 
 /* Assignee Display Styles */
+.task-meta-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  border-top: 1px dashed #eee;
+  font-size: 13px;
+  color: #6c757d;
+}
+
+.task-assignees-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.task-created-info {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  margin-left: 15px;
+}
+
+.created-label {
+  font-weight: 500;
+  color: #888;
+}
+
+.created-value {
+  font-weight: 600;
+  color: #495057;
+}
+
+.task-created-info .separator {
+  margin-left: 10px;
+}
+
 .task-assignees {
   display: flex;
   align-items: center;
@@ -450,7 +487,6 @@ small {
   white-space: nowrap;
 }
 
-/* Alternative color schemes for variety */
 .assignee-avatar:nth-child(2) {
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
 }
@@ -483,7 +519,6 @@ small {
   color: #fa709a;
 }
 
-/* Unassigned state */
 .unassigned-indicator {
   display: inline-flex;
   align-items: center;
@@ -502,7 +537,6 @@ small {
   color: #999;
 }
 
-/* Compact view for many assignees */
 .assignee-count-badge {
   display: inline-flex;
   align-items: center;
@@ -582,7 +616,6 @@ small {
   color: #333;
 }
 
-/* Color Classes for Popup */
 .popup-message.alert-success {
   border: 1px solid #cfc;
   background-color: #f0fff0;
@@ -601,7 +634,6 @@ small {
   color: #c62828;
 }
 
-/* Close button inside popup */
 .popup-message .close-btn {
   font-size: 24px;
   color: #aaa;
@@ -616,18 +648,17 @@ small {
   color: #333;
 }
 
-/* Center the OK button */
 .popup-message .btn-primary {
   display: block;
   margin: 0 auto;
   width: 50%;
 }
 
-/* Animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }

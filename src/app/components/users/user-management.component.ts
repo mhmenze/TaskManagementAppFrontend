@@ -1,10 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  FormsModule,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { Router } from '@angular/router';
 import { UserService } from '../../services/user.service';
 import { AuthService } from '../../services/auth.service';
-import { User } from '../../models/user.model';
+import { User, initializeEmptyUser } from '../../models/user.model';
 
 interface Alert {
   message: string;
@@ -17,18 +23,19 @@ interface Alert {
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './user-management.component.html',
-  styleUrls: ['./user-management.component.css']
+  styleUrls: ['./user-management.component.css'],
 })
 export class UserManagementComponent implements OnInit {
   users: User[] = [];
   filteredUsers: User[] = [];
   currentUser: any;
+  loginUser:User = initializeEmptyUser();
   isAdmin: boolean = false;
 
   userForm!: FormGroup;
   isEditMode = true;
   selectedUserId?: number;
-  isEditingSelf = false;
+  isEditingSelf = true;
 
   searchTerm = '';
   loading = false;
@@ -47,7 +54,7 @@ export class UserManagementComponent implements OnInit {
 
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUser();
-    this.isAdmin = this.currentUser?.userRole === "admin";
+    this.isAdmin = this.currentUser?.userRole === 'admin';
 
     this.userForm = this.formBuilder.group({
       firstName: ['', Validators.required],
@@ -57,7 +64,7 @@ export class UserManagementComponent implements OnInit {
       username: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       password: [''],
-      confirmPassword: ['']
+      confirmPassword: [''],
     });
 
     this.loadUsers();
@@ -71,29 +78,35 @@ export class UserManagementComponent implements OnInit {
         if (response.success && response.data) {
           this.users = response.data;
           this.applyFilter();
+          this.onEditUser(this.loginUser);
         }
       },
       error: (error) => {
         this.loading = false;
         this.showToast('Error loading users', 'error');
-      }
+      },
     });
   }
 
   applyFilter(): void {
+    this.loginUser = this.users.find(
+      (u) => u.userID === this.currentUser.userID
+    ) || initializeEmptyUser();
+
     if (!this.searchTerm) {
-      this.filteredUsers = this.users.filter(u => u.userID !== this.currentUser.userID);
+      this.filteredUsers = this.users.filter(
+        (u) => u.userID !== this.currentUser.userID
+      );
     } else {
       const term = this.searchTerm.toLowerCase();
-      this.filteredUsers = this.users.filter(user => 
-        user.userID !== this.currentUser.userID && 
-        (
-          user.firstName.toLowerCase().includes(term) ||
-          user.lastName.toLowerCase().includes(term) ||
-          user.displayName?.toLowerCase().includes(term) ||
-          user.username.toLowerCase().includes(term) ||
-          user.email.toLowerCase().includes(term) 
-        )
+      this.filteredUsers = this.users.filter(
+        (user) =>
+          user.userID !== this.currentUser.userID &&
+          (user.firstName.toLowerCase().includes(term) ||
+            user.lastName.toLowerCase().includes(term) ||
+            user.displayName?.toLowerCase().includes(term) ||
+            user.username.toLowerCase().includes(term) ||
+            user.email.toLowerCase().includes(term))
       );
     }
   }
@@ -116,7 +129,7 @@ export class UserManagementComponent implements OnInit {
       username: user.username,
       email: user.email,
       password: '',
-      confirmPassword: ''
+      confirmPassword: '',
     });
 
     // Make password optional for editing
@@ -132,7 +145,9 @@ export class UserManagementComponent implements OnInit {
     this.isEditingSelf = false;
 
     // Make password required for new users
-    this.userForm.get('password')?.setValidators([Validators.required, Validators.minLength(6)]);
+    this.userForm
+      .get('password')
+      ?.setValidators([Validators.required, Validators.minLength(6)]);
     this.userForm.get('confirmPassword')?.setValidators([Validators.required]);
     this.userForm.get('password')?.updateValueAndValidity();
     this.userForm.get('confirmPassword')?.updateValueAndValidity();
@@ -147,7 +162,10 @@ export class UserManagementComponent implements OnInit {
     const formValue = this.userForm.value;
 
     // Check if passwords match when provided
-    if (formValue.password && formValue.password !== formValue.confirmPassword) {
+    if (
+      formValue.password &&
+      formValue.password !== formValue.confirmPassword
+    ) {
       this.showToast('Passwords do not match', 'error');
       return;
     }
@@ -163,29 +181,31 @@ export class UserManagementComponent implements OnInit {
         displayName: formValue.displayName || undefined,
         username: formValue.username,
         email: formValue.email,
-        password: formValue.password || undefined // Only include if provided
+        password: formValue.password || undefined, // Only include if provided
       };
 
-      this.userService.updateUser(this.selectedUserId, updateRequest).subscribe({
-        next: (response) => {
-          this.loading = false;
-          if (response.success) {
-            this.showToast('User updated successfully', 'success');
-            this.loadUsers();
-            this.resetForm();
+      this.userService
+        .updateUser(this.selectedUserId, updateRequest)
+        .subscribe({
+          next: (response) => {
+            this.loading = false;
+            if (response.success) {
+              this.showToast('User updated successfully', 'success');
+              this.loadUsers();
+              this.resetForm();
 
-            // If user edited themselves, update current user info
-            if (this.isEditingSelf) {
-              const updatedUser = { ...this.currentUser, ...updateRequest };
-              this.authService.updateCurrentUser(updatedUser);
+              // If user edited themselves, update current user info
+              if (this.isEditingSelf) {
+                const updatedUser = { ...this.currentUser, ...updateRequest };
+                this.authService.updateCurrentUser(updatedUser);
+              }
             }
-          }
-        },
-        error: () => {
-          this.loading = false;
-          this.showToast('Error updating user', 'error');
-        }
-      });
+          },
+          error: () => {
+            this.loading = false;
+            this.showToast('Error updating user', 'error');
+          },
+        });
     } else {
       // Create new user
       const createRequest = {
@@ -196,7 +216,7 @@ export class UserManagementComponent implements OnInit {
         username: formValue.username,
         userRole: 'user',
         email: formValue.email,
-        password: formValue.password
+        password: formValue.password,
       };
 
       this.userService.createUser(createRequest).subscribe({
@@ -210,8 +230,11 @@ export class UserManagementComponent implements OnInit {
         },
         error: () => {
           this.loading = false;
-          this.showToast('Error creating user. Username or email may already exist.', 'error');
-        }
+          this.showToast(
+            'Error creating user. Username or email may already exist.',
+            'error'
+          );
+        },
       });
     }
   }
@@ -237,7 +260,7 @@ export class UserManagementComponent implements OnInit {
       },
       error: () => {
         this.showToast('Error deleting user', 'error');
-      }
+      },
     });
   }
 
@@ -255,23 +278,23 @@ export class UserManagementComponent implements OnInit {
       username: '',
       email: '',
       password: '',
-      confirmPassword: ''
+      confirmPassword: '',
     });
-    this.isEditMode = false;
+    this.isEditMode = true;
     this.selectedUserId = undefined;
-    this.isEditingSelf = false;
+    this.isEditingSelf = true;
   }
 
   getInitials(user: User): string {
     const firstName = user.firstName || '';
     const lastName = user.lastName || '';
-    
+
     if (firstName && lastName) {
       return (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
     } else if (firstName) {
       return firstName.charAt(0).toUpperCase();
     }
-    
+
     return user.username.charAt(0).toUpperCase();
   }
 
